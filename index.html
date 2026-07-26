@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<!-- saved from url=(0186)file:///C:/Users/BPS/AppData/Local/Packages/5319275A.WhatsAppDesktop_cv1g1gvanyjgm/LocalState/sessions/A692BE1C6D1792EC596CA547475FCF95FC9422D9/transfers/2026-30/parents-call-record.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Parents' Call Record – Om Shanti Academy</title>
+
+    <!-- ── PWA: installable app support ──────────────────────── -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3d5a99">
+    <link rel="icon" href="icons/icon-192.png">
+    <!-- iOS: Safari doesn't read the manifest for home-screen installs,
+         so these tags do the equivalent job there. -->
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Call Record">
+    <style>
+        /* ── Tokens ─────────────────────────────────────────── */
+        :root {
+            --ink:        #1a1a2e;
+            --mid:        #4a4a6a;
+            --border:     #b0b0c8;
+            --soft:       #e8e8f4;
+            --accent:     #3d5a99;
+            --accent-lt:  #d6dff5;
+            --success:    #2e7d52;
+            --success-lt: #d4eddf;
+            --danger:     #c0392b;
+            --bg:         #f0f0f7;
+            --white:      #ffffff;
+            --radius:     6px;
+            --shadow:     0 2px 12px rgba(0,0,0,0.09);
+        }
+
+        /* ── Reset & base ───────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Times New Roman', serif;
+            background: var(--bg);
+            color: var(--ink);
+            padding: 24px 16px 48px;
+        }
+
+        /* ── Wrapper ────────────────────────────────────────── */
+        .wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        /* ── Header (screen only) ───────────────────────────── */
+        .screen-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .screen-header .academy-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+        .screen-header .subtitle {
+            font-size: 0.85rem;
+            letter-spacing: 0.12em;
+            color: var(--mid);
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+        .header-rule {
+            border: none;
+            border-top: 3px solid var(--accent);
+            margin: 12px 0 0;
+        }
+
+        /* ── Form card ──────────────────────────────────────── */
+        .form-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+        .form-card h4 {
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--mid);
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--soft);
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .form-row:last-child { margin-bottom: 0; }
+
+        label.field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 110px;
+        }
+        label.field span {
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--mid);
+            font-family: Arial, sans-serif;
+        }
+        input, select {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-family: 'Times New Roman', serif;
+            background: var(--white);
+            color: var(--ink);
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-lt);
+        }
+        select { cursor: pointer; }
+
+        /* Custom "Other" input */
+        .custom-input-wrap {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height .25s ease, opacity .2s ease, margin-top .25s ease;
+            margin-top: 0;
+        }
+        .custom-input-wrap.visible {
+            max-height: 60px;
+            opacity: 1;
+            margin-top: 6px;
+        }
+        .custom-input-wrap input {
+            width: 100%;
+            border-color: var(--accent);
+            background: var(--accent-lt);
+        }
+        .custom-input-wrap input::placeholder { font-style: italic; color: var(--mid); }
+
+        /* Date trio */
+        .date-group {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            min-width: 160px;
+        }
+        .date-group select { flex: 1; min-width: 0; }
+
+        /* ── Action buttons ─────────────────────────────────── */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: opacity .15s, transform .1s;
+        }
+        .btn:active { transform: scale(.98); }
+        .btn-add  { background: var(--success); color: var(--white); }
+        .btn-clear{ background: var(--danger);  color: var(--white); }
+        .btn-print{ background: var(--accent);  color: var(--white); }
+        .btn:hover { opacity: .88; }
+
+        /* ── Stats bar ──────────────────────────────────────── */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .stat-chip {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-family: Arial, sans-serif;
+            font-size: 0.8rem;
+            color: var(--mid);
+            box-shadow: var(--shadow);
+        }
+        .stat-chip strong { color: var(--ink); }
+
+        /* ── Table ──────────────────────────────────────────── */
+        .table-wrap {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        th, td {
+            border: 1px solid #c0c0d0;
+            padding: 7px 10px;
+            vertical-align: middle;
+        }
+        thead th {
+            background: var(--accent);
+            color: var(--white);
+            font-family: Arial, sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+        }
+        tbody tr:nth-child(even) { background: #f5f5fb; }
+        tbody tr:hover { background: var(--accent-lt); }
+        td { color: var(--ink); }
+        td:first-child { text-align: center; color: var(--mid); font-family: Arial, sans-serif; }
+
+        /* Badge for response */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-confirmed    { background: var(--success-lt); color: var(--success); }
+        .badge-unreachable  { background: #fde8e6; color: var(--danger); }
+        .badge-pickup       { background: #fff3cd; color: #856404; }
+        .badge-willdoit     { background: #d1ecf1; color: #0c5460; }
+
+        /* Delete btn in row */
+        .del-btn {
+            background: none;
+            border: none;
+            color: #c0392b;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0 4px;
+            opacity: .6;
+            transition: opacity .15s;
+        }
+        .del-btn:hover { opacity: 1; }
+
+        /* Empty state */
+        .empty-row td {
+            text-align: center;
+            padding: 32px;
+            color: var(--mid);
+            font-family: Arial, sans-serif;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* ── Export card ────────────────────────────────────── */
+        .export-card {
+            background: var(--white);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+        .export-card h4 {
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--accent-lt);
+        }
+        .export-preview {
+            margin-top: 10px;
+            padding: 8px 14px;
+            background: var(--accent-lt);
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-family: Arial, sans-serif;
+            color: var(--mid);
+        }
+        .export-preview strong { color: var(--accent); }
+
+        /* ── Print meta row ─────────────────────────────────── */
+        .print-meta { display: none; }
+
+        /* ── Toast ──────────────────────────────────────────── */
+        #toast {
+            position: fixed;
+            bottom: 28px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--ink);
+            color: var(--white);
+            padding: 10px 22px;
+            border-radius: 20px;
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            opacity: 0;
+            transition: all .3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ─────────────────────────────────────────────────────
+           PRINT STYLES — match the physical sheet in the photo
+        ───────────────────────────────────────────────────── */
+        @media print {
+            @page { size: A4 landscape; margin: 8mm 10mm; }
+
+            body {
+                background: white !important;
+                padding: 0 !important;
+                font-family: 'Times New Roman', serif;
+                color: #000 !important;
+            }
+
+            /* Hide all interactive UI */
+            .no-print { display: none !important; }
+            .stats-bar { display: none !important; }
+            .del-btn   { display: none !important; }
+            .table-wrap {
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                overflow: visible !important;
+            }
+
+            /* Print header */
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 4px;
+            }
+            .print-header .p-academy {
+                font-size: 12pt;
+                font-weight: bold;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+            .print-header .p-subtitle {
+                font-size: 8.5pt;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+            .print-header .p-rule {
+                border: none;
+                border-top: 1.5pt solid #000;
+                margin: 2px 0;
+            }
+
+            /* Print meta */
+            .print-meta {
+                display: block !important;
+                margin-bottom: 3pt;
+            }
+            .print-meta .meta-row {
+                display: flex;
+                justify-content: space-between;
+                font-size: 8.5pt;
+                font-family: 'Times New Roman', serif;
+                padding: 0 2pt;
+                margin-bottom: 2pt;
+            }
+            .print-meta .meta-item {
+                display: inline-block;
+            }
+            .print-meta .meta-label {
+                font-weight: normal;
+            }
+            .print-meta .meta-value {
+                font-weight: bold;
+                text-decoration: underline;
+                min-width: 110pt;
+                display: inline-block;
+            }
+
+            /* Table print — compact rows so far more fit per page */
+            table { font-size: 8pt; border-collapse: collapse; width: 100%; }
+            th, td { border: 0.75pt solid #000 !important; padding: 2.5pt 5pt !important; line-height: 1.15; }
+            thead th {
+                background: #e0e0e8 !important;
+                color: #000 !important;
+                font-size: 7.5pt;
+                padding: 3pt 5pt !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tbody tr { background: white !important; }
+            tbody tr:nth-child(even) { background: white !important; }
+
+            /* Override badges for print */
+            .badge { background: none !important; color: #000 !important; padding: 0 !important; font-weight: normal !important; font-size: 8pt !important; }
+        }
+
+        /* Print header hidden on screen */
+        .print-header { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <!-- ── Screen header ──────────────────────────── -->
+    <div class="screen-header no-print">
+        <div class="academy-name">Om Shanti Academy</div>
+        <div class="subtitle">Parents' Call Record — Secondary Block</div>
+        <hr class="header-rule">
+    </div>
+
+    <!-- ── Print header (shows only when printing) ── -->
+    <div class="print-header">
+        <div class="p-academy">Om Shanti Academy</div>
+        <div class="p-subtitle">Parents' Call Record (Secondary Block)</div>
+        <hr class="p-rule">
+    </div>
+
+    <!-- ── Print meta: teacher + date range (print only) ── -->
+    <div class="print-meta" id="printMeta">
+        <div class="meta-row">
+            <span class="meta-item">
+                <span class="meta-label">Teacher: </span>
+                <span class="meta-value" id="printTeacher">&nbsp;</span>
+            </span>
+            <span class="meta-item">
+                <span class="meta-label">Period: </span>
+                <span class="meta-value" id="printPeriod">&nbsp;</span>
+            </span>
+            <span class="meta-item">
+                <span class="meta-label">Total Records: </span>
+                <span class="meta-value" id="printTotal">&nbsp;</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- ── Entry form ──────────────────────────────── -->
+    <div class="form-card no-print">
+        <h4>Add a New Entry</h4>
+
+        <div class="form-row">
+            <!-- Date -->
+            <label class="field" style="flex:1.6; min-width:170px;">
+                <span>Date (YYYY / MM / DD)</span>
+                <div class="date-group">
+                    <select id="year">
+                        <option value="">YYYY</option>
+                        <option value="2082">2082</option>
+                        <option value="2083">2083</option>
+                        <option value="2084">2084</option>
+                    </select>
+                    <select id="month">
+                        <option value="">MM</option>
+                        <script>for(let i=1;i<=12;i++) document.write('<option value="'+i.toString().padStart(2,'0')+'">'+i.toString().padStart(2,'0')+'</option>');</script>
+                    </select>
+                    <select id="day">
+                        <option value="">DD</option>
+                        <script>for(let i=1;i<=32;i++) document.write('<option value="'+i.toString().padStart(2,'0')+'">'+i.toString().padStart(2,'0')+'</option>');</script>
+                    </select>
+                </div>
+            </label>
+
+            <!-- Student -->
+            <label class="field">
+                <span>Student Name</span>
+                <input type="text" id="student" placeholder="Full name">
+            </label>
+
+            <!-- Grade -->
+            <label class="field" style="flex:.5; min-width:80px;">
+                <span>Grade</span>
+                <input type="text" id="grade" placeholder="e.g. 9A">
+            </label>
+        </div>
+
+        <div class="form-row">
+            <!-- Spoken to -->
+            <label class="field">
+                <span>Spoken To</span>
+                <select id="spokenTo" onchange="toggleCustom('spokenTo', 'customSpokenTo', 'spokenToWrap')">
+                    <option value="">Select relation</option>
+                    <option>Mother</option>
+                    <option>Father</option>
+                    <option>Brother</option>
+                    <option>Sister</option>
+                    <option>Uncle</option>
+                    <option>Aunt</option>
+                    <option>Tuition Teacher</option>
+                    <option value="Other">Other (specify below)</option>
+                </select>
+                <div class="custom-input-wrap" id="spokenToWrap">
+                    <input type="text" id="customSpokenTo" placeholder="✏️  Type the relation / name…" maxlength="120">
+                </div>
+            </label>
+
+            <!-- Reason -->
+            <label class="field">
+                <span>Reason for Calling</span>
+                <select id="reason" onchange="toggleCustom(&#39;reason&#39;, &#39;customReason&#39;, &#39;reasonWrap&#39;)">
+                    <option value="">Select reason</option>
+                    <option>Absent</option>
+                    <option>Homework not done</option>
+                    <option>Sick</option>
+                    <option>Fever</option>
+                    <option>Behavioural concern</option>
+                    <option>Late arrival</option>
+                    <option value="Other">Other (specify below)</option>
+                </select>
+                <div class="custom-input-wrap" id="reasonWrap">
+                    <input type="text" id="customReason" placeholder="✏️  Type the reason…" maxlength="120">
+                </div>
+            </label>
+
+            <!-- Response -->
+            <label class="field">
+                <span>Parent's Response</span>
+                <select id="response" onchange="toggleCustom(&#39;response&#39;, &#39;customResponse&#39;, &#39;responseWrap&#39;)">
+                    <option value="">Select response</option>
+                    <option>Confirmed</option>
+                    <option>Will attend to it</option>
+                    <option>Coming to pick up</option>
+                    <option>Unreachable</option>
+                    <option value="Other">Other (specify below)</option>
+                </select>
+                <div class="custom-input-wrap" id="responseWrap">
+                    <input type="text" id="customResponse" placeholder="✏️  Type the response…" maxlength="120">
+                </div>
+            </label>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-add" id="addBtn" onclick="addRecord()">＋ Add Entry</button>
+            <button class="btn" id="cancelEditBtn" style="display:none; background:var(--mid); color:var(--white);" onclick="cancelEdit()">Cancel Edit</button>
+            <button class="btn btn-clear" onclick="clearAll()">✕ Clear All Records</button>
+        </div>
+    </div>
+
+    <!-- ── Export settings card ─────────────────────── -->
+    <div class="export-card no-print">
+        <h4>⎙ Export / Print Settings</h4>
+        <div class="form-row">
+            <label class="field">
+                <span>Teacher Name</span>
+                <input type="text" id="exportTeacher" placeholder="e.g. Mrs. Sharma" oninput="updateExportPreview()">
+            </label>
+            <label class="field">
+                <span>From Date (YYYY/MM/DD)</span>
+                <input type="text" id="exportFrom" placeholder="e.g. 2083/01/01" oninput="updateExportPreview()">
+            </label>
+            <label class="field">
+                <span>To Date (YYYY/MM/DD)</span>
+                <input type="text" id="exportTo" placeholder="e.g. 2083/12/32" oninput="updateExportPreview()">
+            </label>
+        </div>
+        <div class="export-preview" id="exportPreview">Fill in teacher name and date range, then click <strong>Export / Print PDF</strong> below.</div>
+        <label style="display:flex; align-items:center; gap:6px; margin-top:12px; font-family:Arial, sans-serif; font-size:0.8rem; color:var(--mid); cursor:pointer;">
+            <input type="checkbox" id="clearAfterExport" style="width:auto; cursor:pointer;">
+            Clear these records after exporting
+        </label>
+        <div class="actions" style="margin-top:12px">
+            <button class="btn btn-print" onclick="doPrint()">⎙ Export / Print PDF</button>
+        </div>
+    </div>
+
+    <!-- ── Stats bar ───────────────────────────────── -->
+    <div class="stats-bar no-print" id="statsBar">
+            <div class="stat-chip">Total entries: <strong>1</strong></div>
+            <div class="stat-chip">Unreachable: <strong>0</strong></div>
+            <div class="stat-chip">Confirmed: <strong>1</strong></div>
+        </div>
+
+    <!-- ── Table ───────────────────────────────────── -->
+    <div class="table-wrap">
+        <table id="recordTable">
+            <thead>
+                <tr>
+                    <th style="width:42px">S.No.</th>
+                    <th style="width:98px">Date</th>
+                    <th>Student Name</th>
+                    <th style="width:64px">Grade</th>
+                    <th>Spoken To</th>
+                    <th>Reason for Calling</th>
+                    <th>Parent's Response</th>
+                    <th class="no-print" style="width:64px"></th>
+                </tr>
+            </thead>
+            <tbody><tr>
+                    <td>1</td>
+                    <td>2083/01/31</td>
+                    <td>Kraz Bhandari</td>
+                    <td style="text-align:center">8D</td>
+                    <td>Mother</td>
+                    <td>Absent</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                    <td class="no-print"><button class="del-btn" title="Delete" onclick="deleteRecord(0)">✕</button></td>
+                </tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- BS (Bikram Sambat) date conversion library, used only to auto-select today's date -->
+<script src="https://cdn.jsdelivr.net/npm/nepali-date-converter/dist/nepali-date-converter.umd.js"></script>
+
+<script>
+    // ── State ──────────────────────────────────────────────────
+    let records = [];
+    try { records = JSON.parse(localStorage.getItem('callRecords') || '[]'); } catch(e) {}
+
+    // ── Custom options that should persist forever ───────────────
+    // Whenever someone types a value under "Other" for Spoken To,
+    // Reason, or Response, it gets saved here and added as a real
+    // option in the dropdown for next time — so it only needs to
+    // be typed once.
+    const CUSTOM_OPTION_FIELDS = {
+        spokenTo: 'customOptions_spokenTo',
+        reason:   'customOptions_reason',
+        response: 'customOptions_response'
+    };
+
+    function loadCustomOptions(selectId) {
+        try {
+            return JSON.parse(localStorage.getItem(CUSTOM_OPTION_FIELDS[selectId]) || '[]');
+        } catch (e) { return []; }
+    }
+
+    function saveCustomOptions(selectId, list) {
+        localStorage.setItem(CUSTOM_OPTION_FIELDS[selectId], JSON.stringify(list));
+    }
+
+    // Insert any previously-saved custom options into a <select>,
+    // just above the "Other" option, so they show up as real choices.
+    function populateCustomOptions(selectId) {
+        const sel = document.getElementById(selectId);
+        const otherOpt = [...sel.options].find(o => o.value === 'Other');
+        loadCustomOptions(selectId).forEach(val => {
+            if ([...sel.options].some(o => o.value === val)) return; // already there
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = val;
+            sel.insertBefore(opt, otherOpt);
+        });
+    }
+
+    // Called after a record is added: if the value came from a
+    // typed "Other" field, remember it permanently for next time.
+    function rememberIfNew(selectId, selectedValue, typedValue) {
+        if (selectedValue !== 'Other' || !typedValue) return;
+        const list = loadCustomOptions(selectId);
+        if (list.includes(typedValue)) return;
+        list.push(typedValue);
+        saveCustomOptions(selectId, list);
+        populateCustomOptions(selectId);
+    }
+
+    // ── Toggle custom "Other" input ────────────────────────────
+    function toggleCustom(selectId, inputId, wrapId) {
+        const sel  = document.getElementById(selectId);
+        const wrap = document.getElementById(wrapId);
+        const inp  = document.getElementById(inputId);
+        if (sel.value === 'Other') {
+            wrap.classList.add('visible');
+            inp.focus();
+        } else {
+            wrap.classList.remove('visible');
+            inp.value = '';
+        }
+    }
+
+    // ── Badge map ──────────────────────────────────────────────
+    const badgeClass = {
+        'Confirmed':         'badge-confirmed',
+        'Will attend to it': 'badge-willdoit',
+        'Coming to pick up': 'badge-pickup',
+        'Unreachable':       'badge-unreachable',
+    };
+
+    // ── Render ─────────────────────────────────────────────────
+    function renderTable() {
+        const tbody = document.querySelector('#recordTable tbody');
+        if (!records.length) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No entries yet. Fill the form above to add a call record.</td></tr>';
+        } else {
+            tbody.innerHTML = records.map((r, i) => {
+                const cls = badgeClass[r.resp] || '';
+                return `<tr>
+                    <td>${i + 1}</td>
+                    <td>${r.date}</td>
+                    <td>${r.name}</td>
+                    <td style="text-align:center">${r.grade}</td>
+                    <td>${r.spoken}</td>
+                    <td>${r.reason}</td>
+                    <td>${cls ? `<span class="badge ${cls}">${r.resp}</span>` : r.resp}</td>
+                    <td class="no-print"><button class="del-btn" title="Edit" onclick="editRecord(${i})">✎</button><button class="del-btn" title="Delete" onclick="deleteRecord(${i})">✕</button></td>
+                </tr>`;
+            }).join('');
+        }
+        renderStats();
+    }
+
+    // ── Stats ──────────────────────────────────────────────────
+    function renderStats() {
+        const bar = document.getElementById('statsBar');
+        if (!records.length) { bar.innerHTML = ''; return; }
+        const unreachable = records.filter(r => r.resp === 'Unreachable').length;
+        bar.innerHTML = `
+            <div class="stat-chip">Total entries: <strong>${records.length}</strong></div>
+            <div class="stat-chip">Unreachable: <strong>${unreachable}</strong></div>
+            <div class="stat-chip">Confirmed: <strong>${records.filter(r => r.resp === 'Confirmed').length}</strong></div>
+        `;
+    }
+
+    // ── Add ────────────────────────────────────────────────────
+    function addRecord() {
+        const y = document.getElementById('year').value;
+        const m = document.getElementById('month').value;
+        const d = document.getElementById('day').value;
+        const name   = document.getElementById('student').value.trim();
+        const grade  = document.getElementById('grade').value.trim();
+        const spokenSel  = document.getElementById('spokenTo').value;
+        const reasonSel  = document.getElementById('reason').value;
+        const respSel    = document.getElementById('response').value;
+
+        // Resolve custom "Other" values
+        const spoken = spokenSel === 'Other'
+            ? document.getElementById('customSpokenTo').value.trim()
+            : spokenSel;
+        const reason = reasonSel === 'Other'
+            ? document.getElementById('customReason').value.trim()
+            : reasonSel;
+        const resp = respSel === 'Other'
+            ? document.getElementById('customResponse').value.trim()
+            : respSel;
+
+        if (!y || !m || !d)  return toast('Please select a full date.');
+        if (!name)           return toast('Student name is required.');
+        if (!grade)          return toast('Grade is required.');
+        if (!spoken)         return toast('Please select who was spoken to — or type one if "Other" is chosen.');
+        if (!reason)         return toast('Please select a reason — or type one if "Other" is chosen.');
+        if (!resp)           return toast('Please select a parent response — or type one if "Other" is chosen.');
+
+        const record = { date: `${y}/${m}/${d}`, name, grade, spoken, reason, resp };
+
+        if (editIndex !== null) {
+            records[editIndex] = record;
+        } else {
+            records.push(record);
+        }
+        save();
+
+        // Remember any newly-typed "Other" values so they become
+        // permanent dropdown options going forward.
+        rememberIfNew('spokenTo', spokenSel, spoken);
+        rememberIfNew('reason', reasonSel, reason);
+        rememberIfNew('response', respSel, resp);
+
+        const wasEditing = editIndex !== null;
+        editIndex = null;
+        setEditUI(false);
+
+        renderTable();
+        clearInputs();
+        toast(wasEditing ? 'Entry updated ✓' : 'Entry added ✓');
+    }
+
+    // ── Edit ───────────────────────────────────────────────────
+    let editIndex = null;
+
+    function editRecord(i) {
+        const r = records[i];
+        editIndex = i;
+
+        const [y, m, d] = r.date.split('/');
+        document.getElementById('year').value = y;
+        document.getElementById('month').value = m;
+        document.getElementById('day').value = d;
+        document.getElementById('student').value = r.name;
+        document.getElementById('grade').value = r.grade;
+
+        setSelectOrCustom('spokenTo', 'customSpokenTo', 'spokenToWrap', r.spoken);
+        setSelectOrCustom('reason', 'customReason', 'reasonWrap', r.reason);
+        setSelectOrCustom('response', 'customResponse', 'responseWrap', r.resp);
+
+        setEditUI(true);
+        document.getElementById('addBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById('student').focus();
+    }
+
+    function cancelEdit() {
+        editIndex = null;
+        setEditUI(false);
+        clearInputs();
+        toast('Edit cancelled.');
+    }
+
+    // Put a stored value into a select — using the matching option if one
+    // exists, or falling back to "Other" + the custom text input if not
+    // (e.g. an older entry typed before this option existed permanently).
+    function setSelectOrCustom(selectId, inputId, wrapId, value) {
+        const sel = document.getElementById(selectId);
+        const hasOption = [...sel.options].some(o => o.value === value);
+        if (hasOption) {
+            sel.value = value;
+            document.getElementById(wrapId).classList.remove('visible');
+            document.getElementById(inputId).value = '';
+        } else {
+            sel.value = 'Other';
+            document.getElementById(wrapId).classList.add('visible');
+            document.getElementById(inputId).value = value;
+        }
+    }
+
+    // Flip the form between "Add" mode and "Editing entry #N" mode.
+    function setEditUI(isEditing) {
+        const addBtn = document.getElementById('addBtn');
+        const cancelBtn = document.getElementById('cancelEditBtn');
+        if (isEditing) {
+            addBtn.textContent = '✓ Update Entry';
+            cancelBtn.style.display = '';
+        } else {
+            addBtn.textContent = '＋ Add Entry';
+            cancelBtn.style.display = 'none';
+        }
+    }
+
+    // ── Delete ─────────────────────────────────────────────────
+    function deleteRecord(i) {
+        if (!confirm('Delete this entry?')) return;
+        records.splice(i, 1);
+        save();
+
+        // Keep an in-progress edit pointed at the right record.
+        if (editIndex !== null) {
+            if (i === editIndex) {
+                cancelEdit(); // the record being edited was just deleted
+            } else if (i < editIndex) {
+                editIndex -= 1;
+            }
+        }
+
+        renderTable();
+    }
+
+    // ── Clear all ──────────────────────────────────────────────
+    function clearAll() {
+        if (!records.length) return toast('No records to clear.');
+        if (!confirm('Delete ALL records? This cannot be undone.')) return;
+        records = [];
+        save();
+        if (editIndex !== null) { editIndex = null; setEditUI(false); clearInputs(); }
+        renderTable();
+        toast('All records cleared.');
+    }
+
+    // ── Helpers ────────────────────────────────────────────────
+    function save() { localStorage.setItem('callRecords', JSON.stringify(records)); }
+
+    function clearInputs() {
+        ['student','grade'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        // Date fields are intentionally left as-is (not reset to today) so
+        // that if the date was changed for a batch of entries, it stays
+        // put for the next entries too, instead of jumping back each time.
+        document.getElementById('spokenTo').selectedIndex = 0;
+        document.getElementById('reason').selectedIndex = 0;
+        document.getElementById('response').selectedIndex = 0;
+        // Hide and clear custom inputs
+        ['customSpokenTo','customReason','customResponse'].forEach(id => document.getElementById(id).value = '');
+        ['spokenToWrap','reasonWrap','responseWrap'].forEach(id => document.getElementById(id).classList.remove('visible'));
+        document.getElementById('student').focus();
+    }
+
+    let toastTimer;
+    function toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+    }
+
+    // ── Export preview ─────────────────────────────────────────
+    function updateExportPreview() {
+        const teacher = document.getElementById('exportTeacher').value.trim();
+        const from    = document.getElementById('exportFrom').value.trim();
+        const to      = document.getElementById('exportTo').value.trim();
+        const preview = document.getElementById('exportPreview');
+
+        let parts = [];
+        if (teacher) parts.push(`Teacher: <strong>${teacher}</strong>`);
+        if (from)    parts.push(`From: <strong>${from}</strong>`);
+        if (to)      parts.push(`To: <strong>${to}</strong>`);
+
+        // Count matching records
+        const filtered = filterRecords(from, to);
+        const countText = (from || to)
+            ? ` &mdash; <strong>${filtered.length}</strong> record(s) in range`
+            : ` &mdash; <strong>${records.length}</strong> total record(s)`;
+
+        preview.innerHTML = parts.length
+            ? parts.join(' &nbsp;|&nbsp; ') + countText
+            : 'Fill in teacher name and date range, then click <strong>Export / Print PDF</strong> below.';
+    }
+
+    // ── Filter records by date range ────────────────────────────
+    function filterRecords(from, to) {
+        return records.filter(r => {
+            if (from && r.date < from) return false;
+            if (to   && r.date > to)   return false;
+            return true;
+        });
+    }
+
+    // ── doPrint: inject meta + filtered rows, then print ────────
+    function doPrint() {
+        const teacher = document.getElementById('exportTeacher').value.trim();
+        const from    = document.getElementById('exportFrom').value.trim();
+        const to      = document.getElementById('exportTo').value.trim();
+
+        // Update print meta elements
+        document.getElementById('printTeacher').textContent = teacher || '(not specified)';
+        const periodText = (from || to)
+            ? `${from || '—'} to ${to || '—'}`
+            : 'All dates';
+        document.getElementById('printPeriod').textContent = periodText;
+
+        // Filter records for print
+        const filtered = filterRecords(from, to);
+        document.getElementById('printTotal').textContent = filtered.length;
+
+        // Temporarily render only filtered rows in tbody
+        const tbody = document.querySelector('#recordTable tbody');
+        const savedHTML = tbody.innerHTML;
+
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20pt;font-style:italic;">No records in the selected date range.</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map((r, i) => {
+                return `<tr>
+                    <td style="text-align:center">${i + 1}</td>
+                    <td>${r.date}</td>
+                    <td>${r.name}</td>
+                    <td style="text-align:center">${r.grade}</td>
+                    <td>${r.spoken}</td>
+                    <td>${r.reason}</td>
+                    <td>${r.resp}</td>
+                    <td class="no-print"></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ── Cleanup logic: runs once, whether triggered by the
+        // 'afterprint' event (fires reliably in Chrome/Edge/Firefox
+        // right when the print dialog closes) or, as a fallback for
+        // browsers that don't fire it (older Safari), by a timeout.
+        let cleanedUp = false;
+        function cleanup() {
+            if (cleanedUp) return;
+            cleanedUp = true;
+            window.removeEventListener('afterprint', cleanup);
+
+            const clearAfter = document.getElementById('clearAfterExport').checked;
+
+            if (clearAfter && filtered.length) {
+                const confirmMsg = (from || to)
+                    ? `Clear the ${filtered.length} exported record(s) from ${periodText}? This cannot be undone.`
+                    : `Clear all ${filtered.length} exported record(s)? This cannot be undone.`;
+                if (confirm(confirmMsg)) {
+                    // If the record currently being edited is one of the
+                    // ones being cleared, back out of edit mode cleanly.
+                    if (editIndex !== null && filtered.includes(records[editIndex])) {
+                        editIndex = null;
+                        setEditUI(false);
+                        clearInputs();
+                    }
+                    // Remove exactly the records that were part of this export
+                    // (matched by reference, since `filtered` is a subset of `records`).
+                    records = records.filter(r => !filtered.includes(r));
+                    save();
+                    renderTable();
+                    toast('Exported records cleared.');
+                    return; // renderTable() already rebuilt the tbody
+                }
+            }
+
+            tbody.innerHTML = savedHTML;
+        }
+
+        window.addEventListener('afterprint', cleanup);
+        // Fallback in case 'afterprint' never fires (some older browsers).
+        setTimeout(cleanup, 60000);
+
+        // Wait for the browser to actually paint the new rows before
+        // opening the print dialog. Calling window.print() in the same
+        // tick as a large innerHTML swap is a known cause of the print
+        // preview getting stuck on "Preparing document for preview…" —
+        // two animation frames guarantees a layout/paint has happened.
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.print();
+            });
+        });
+    }
+
+    // ── Auto-select today's date in the Year/Month/Day dropdowns ─
+    // Dates in this form are in Bikram Sambat (BS), so we convert
+    // the device's current date (AD) to BS via the nepali-date-converter
+    // library loaded above, then select the matching options.
+    function setDefaultDate() {
+        try {
+            const NepaliDateCtor = (typeof NepaliDate === 'function') ? NepaliDate : NepaliDate.default;
+            const today = new NepaliDateCtor(); // current date, converted to BS
+            const yVal = String(today.getYear());
+            const mVal = String(today.getMonth() + 1).padStart(2, '0'); // getMonth() is 0-indexed
+            const dVal = String(today.getDate()).padStart(2, '0');
+
+            const yearSel = document.getElementById('year');
+
+            // If today's BS year isn't already in the dropdown (e.g. it rolled
+            // over into a year not yet listed), add it so it can be selected.
+            if (![...yearSel.options].some(o => o.value === yVal)) {
+                const opt = document.createElement('option');
+                opt.value = yVal;
+                opt.textContent = yVal;
+                yearSel.appendChild(opt);
+            }
+
+            yearSel.value = yVal;
+            document.getElementById('month').value = mVal;
+            document.getElementById('day').value = dVal;
+        } catch (e) {
+            // If the conversion library failed to load (e.g. offline), just
+            // leave the date selectors on their default placeholders.
+            console.warn("Couldn't auto-select today's date:", e);
+        }
+    }
+
+    // ── Init ───────────────────────────────────────────────────
+    populateCustomOptions('spokenTo');
+    populateCustomOptions('reason');
+    populateCustomOptions('response');
+    renderTable();
+    updateExportPreview();
+    setDefaultDate();
+
+    // ── PWA: register service worker for offline support ────────
+    // Requires HTTPS (or localhost) — browsers refuse service workers
+    // over plain http:// or file://.
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('service-worker.js')
+                .catch((err) => console.warn('Service worker registration failed:', err));
+        });
+    }
+</script>
+
+
+</body></html>
