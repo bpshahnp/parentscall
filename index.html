@@ -2,19 +2,8 @@
 <!-- saved from url=(0186)file:///C:/Users/BPS/AppData/Local/Packages/5319275A.WhatsAppDesktop_cv1g1gvanyjgm/LocalState/sessions/A692BE1C6D1792EC596CA547475FCF95FC9422D9/transfers/2026-30/parents-call-record.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parents' Call Record – Om Shanti Academy</title>
-
-    <!-- ── PWA: installable app support ──────────────────────── -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3d5a99">
-    <link rel="icon" href="icons/icon-192.png">
-    <!-- iOS: Safari doesn't read the manifest for home-screen installs,
-         so these tags do the equivalent job there. -->
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Call Record">
     <style>
         /* ── Tokens ─────────────────────────────────────────── */
         :root {
@@ -420,17 +409,130 @@
 
         /* Print header hidden on screen */
         .print-header { display: none; }
+
+        /* ── Auth screen ────────────────────────────────────── */
+        #authScreen {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+        .auth-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 28px 26px;
+            width: 100%;
+            max-width: 340px;
+        }
+        .auth-card .academy-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: var(--accent);
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .auth-card .subtitle {
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            color: var(--mid);
+            text-transform: uppercase;
+            text-align: center;
+            margin-top: 3px;
+            margin-bottom: 18px;
+        }
+        .auth-card label.field { margin-bottom: 10px; }
+        .auth-card input { width: 100%; }
+        #authError {
+            font-family: Arial, sans-serif;
+            font-size: 0.78rem;
+            color: var(--danger);
+            min-height: 1em;
+            margin-bottom: 4px;
+        }
+        .auth-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+        .auth-actions .btn { width: 100%; }
+        .auth-link {
+            display: block;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 0.76rem;
+            color: var(--accent);
+            margin-top: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        #authLoading {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            color: var(--mid);
+            padding: 40px 0;
+        }
+
+        /* ── Signed-in user bar ─────────────────────────────── */
+        .user-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 0.76rem;
+            color: var(--mid);
+            margin-top: 8px;
+        }
+        .user-bar .logout-link {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
+<!-- ── Auth screen (shown when signed out) ──────────────── -->
+<div id="authScreen" class="no-print">
+    <div class="auth-card">
+        <div class="academy-name">Om Shanti Academy</div>
+        <div class="subtitle">Parents' Call Record — Sign In</div>
+
+        <div id="authLoading">Checking sign-in status…</div>
+
+        <form id="loginForm" class="hidden" onsubmit="return false;">
+            <div id="authError"></div>
+            <label class="field">
+                <span>Email</span>
+                <input type="email" id="authEmail" placeholder="you@omshanti.edu.np" autocomplete="username">
+            </label>
+            <label class="field">
+                <span>Password</span>
+                <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+            </label>
+            <div class="auth-actions">
+                <button type="submit" class="btn btn-add" id="loginBtn" onclick="handleLogin()">Sign In</button>
+            </div>
+            <span class="auth-link" onclick="handleResetPassword()">Forgot password?</span>
+        </form>
+    </div>
+</div>
+
+<div class="wrapper hidden" id="appWrapper">
 
     <!-- ── Screen header ──────────────────────────── -->
     <div class="screen-header no-print">
         <div class="academy-name">Om Shanti Academy</div>
         <div class="subtitle">Parents' Call Record — Secondary Block</div>
         <hr class="header-rule">
+        <div class="user-bar">
+            Signed in as <strong id="userEmailLabel">&nbsp;</strong>
+            &nbsp;|&nbsp;
+            <span class="logout-link" onclick="handleLogout()">Sign out</span>
+        </div>
     </div>
 
     <!-- ── Print header (shows only when printing) ── -->
@@ -588,9 +690,9 @@
 
     <!-- ── Stats bar ───────────────────────────────── -->
     <div class="stats-bar no-print" id="statsBar">
-            <div class="stat-chip">Total entries: <strong>1</strong></div>
+            <div class="stat-chip">Total entries: <strong>0</strong></div>
             <div class="stat-chip">Unreachable: <strong>0</strong></div>
-            <div class="stat-chip">Confirmed: <strong>1</strong></div>
+            <div class="stat-chip">Confirmed: <strong>0</strong></div>
         </div>
 
     <!-- ── Table ───────────────────────────────────── -->
@@ -608,16 +710,7 @@
                     <th class="no-print" style="width:64px"></th>
                 </tr>
             </thead>
-            <tbody><tr>
-                    <td>1</td>
-                    <td>2083/01/31</td>
-                    <td>Kraz Bhandari</td>
-                    <td style="text-align:center">8D</td>
-                    <td>Mother</td>
-                    <td>Absent</td>
-                    <td><span class="badge badge-confirmed">Confirmed</span></td>
-                    <td class="no-print"><button class="del-btn" title="Delete" onclick="deleteRecord(0)">✕</button></td>
-                </tr></tbody>
+            <tbody><tr class="empty-row"><td colspan="8">Loading records…</td></tr></tbody>
         </table>
     </div>
 </div>
@@ -628,10 +721,132 @@
 <!-- BS (Bikram Sambat) date conversion library, used only to auto-select today's date -->
 <script src="https://cdn.jsdelivr.net/npm/nepali-date-converter/dist/nepali-date-converter.umd.js"></script>
 
+<!-- Firebase SDK (compat build) — powers staff sign-in and cross-device sync -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+    // ════════════════════════════════════════════════════════════
+    // FIREBASE CONFIG — paste your project's config below.
+    // Firebase Console → Project settings (gear icon) → General
+    // → "Your apps" → Web app (</>)  → SDK setup and configuration
+    // ════════════════════════════════════════════════════════════
+    const firebaseConfig = {
+  apiKey: "AIzaSyCgwCcg4bgvhMR9EwwNAX-U5gkTSoE0s64",
+  authDomain: "om-shanti-call-record.firebaseapp.com",
+  projectId: "om-shanti-call-record",
+  storageBucket: "om-shanti-call-record.firebasestorage.app",
+  messagingSenderId: "982022045071",
+  appId: "1:982022045071:web:d4199735d5b9173f371ffa",
+  measurementId: "G-L7YQMQMYGM"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
+    // Firestore collection all signed-in staff read/write to.
+    // Every teacher sees the same shared call log across all devices.
+    const recordsCol = db.collection('callRecords');
+</script>
+
 <script>
     // ── State ──────────────────────────────────────────────────
+    // `records` is kept in sync with Firestore in real time (see
+    // watchRecords() below) — no more reading/writing localStorage.
     let records = [];
-    try { records = JSON.parse(localStorage.getItem('callRecords') || '[]'); } catch(e) {}
+    let unsubscribeRecords = null; // Firestore listener detacher
+
+    // ── Auth: sign in / out / reset ──────────────────────────────
+    function handleLogin() {
+        const email = document.getElementById('authEmail').value.trim();
+        const pass  = document.getElementById('authPassword').value;
+        const errEl = document.getElementById('authError');
+        const btn   = document.getElementById('loginBtn');
+        errEl.textContent = '';
+
+        if (!email || !pass) {
+            errEl.textContent = 'Please enter your email and password.';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Signing in…';
+        auth.signInWithEmailAndPassword(email, pass)
+            .catch(err => {
+                errEl.textContent = friendlyAuthError(err);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+            });
+    }
+
+    function handleLogout() {
+        if (!confirm('Sign out?')) return;
+        auth.signOut();
+    }
+
+    function handleResetPassword() {
+        const email = document.getElementById('authEmail').value.trim();
+        const errEl = document.getElementById('authError');
+        if (!email) {
+            errEl.textContent = 'Type your email above first, then click "Forgot password?" again.';
+            return;
+        }
+        auth.sendPasswordResetEmail(email)
+            .then(() => { errEl.style.color = 'var(--success)'; errEl.textContent = 'Reset email sent — check your inbox.'; })
+            .catch(err => { errEl.style.color = 'var(--danger)'; errEl.textContent = friendlyAuthError(err); });
+    }
+
+    function friendlyAuthError(err) {
+        const map = {
+            'auth/invalid-email':        'That email address looks invalid.',
+            'auth/user-disabled':        'This account has been disabled. Contact the admin.',
+            'auth/user-not-found':       'No account found for that email.',
+            'auth/wrong-password':       'Incorrect password.',
+            'auth/invalid-credential':   'Incorrect email or password.',
+            'auth/too-many-requests':    'Too many attempts. Please wait a moment and try again.',
+        };
+        return map[err.code] || ('Sign-in error: ' + err.message);
+    }
+
+    // ── Auth state: gate the app behind sign-in ───────────────────
+    auth.onAuthStateChanged(user => {
+        const authScreen  = document.getElementById('authScreen');
+        const authLoading = document.getElementById('authLoading');
+        const loginForm   = document.getElementById('loginForm');
+        const appWrapper  = document.getElementById('appWrapper');
+
+        if (user) {
+            authScreen.classList.add('hidden');
+            appWrapper.classList.remove('hidden');
+            document.getElementById('userEmailLabel').textContent = user.email;
+            watchRecords();
+        } else {
+            if (unsubscribeRecords) { unsubscribeRecords(); unsubscribeRecords = null; }
+            records = [];
+            appWrapper.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+            authLoading.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            document.getElementById('authEmail').focus();
+        }
+    });
+
+    // ── Real-time sync: mirror the Firestore collection into `records` ──
+    function watchRecords() {
+        if (unsubscribeRecords) return; // already watching
+        unsubscribeRecords = recordsCol.orderBy('date', 'asc').onSnapshot(snapshot => {
+            records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderTable();
+            updateExportPreview();
+        }, err => {
+            console.error('Firestore sync error:', err);
+            toast('Could not load records — check your connection.');
+        });
+    }
 
     // ── Custom options that should persist forever ───────────────
     // Whenever someone types a value under "Other" for Spoken To,
@@ -737,7 +952,7 @@
     }
 
     // ── Add ────────────────────────────────────────────────────
-    function addRecord() {
+    async function addRecord() {
         const y = document.getElementById('year').value;
         const m = document.getElementById('month').value;
         const d = document.getElementById('day').value;
@@ -766,13 +981,27 @@
         if (!resp)           return toast('Please select a parent response — or type one if "Other" is chosen.');
 
         const record = { date: `${y}/${m}/${d}`, name, grade, spoken, reason, resp };
+        const wasEditing = editIndex !== null;
 
-        if (editIndex !== null) {
-            records[editIndex] = record;
-        } else {
-            records.push(record);
+        const addBtn = document.getElementById('addBtn');
+        addBtn.disabled = true;
+
+        try {
+            if (wasEditing) {
+                await recordsCol.doc(records[editIndex].id).update(record);
+            } else {
+                await recordsCol.add({
+                    ...record,
+                    createdBy: auth.currentUser ? auth.currentUser.email : null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        } catch (e) {
+            console.error('Save failed:', e);
+            addBtn.disabled = false;
+            return toast('Could not save — check your connection and try again.');
         }
-        save();
+        addBtn.disabled = false;
 
         // Remember any newly-typed "Other" values so they become
         // permanent dropdown options going forward.
@@ -780,11 +1009,11 @@
         rememberIfNew('reason', reasonSel, reason);
         rememberIfNew('response', respSel, resp);
 
-        const wasEditing = editIndex !== null;
         editIndex = null;
         setEditUI(false);
 
-        renderTable();
+        // renderTable() will also run automatically via the Firestore
+        // listener once the change comes back down, but we don't wait on that.
         clearInputs();
         toast(wasEditing ? 'Entry updated ✓' : 'Entry added ✓');
     }
@@ -850,10 +1079,9 @@
     }
 
     // ── Delete ─────────────────────────────────────────────────
-    function deleteRecord(i) {
+    async function deleteRecord(i) {
         if (!confirm('Delete this entry?')) return;
-        records.splice(i, 1);
-        save();
+        const id = records[i].id;
 
         // Keep an in-progress edit pointed at the right record.
         if (editIndex !== null) {
@@ -864,23 +1092,33 @@
             }
         }
 
-        renderTable();
+        try {
+            await recordsCol.doc(id).delete();
+        } catch (e) {
+            console.error('Delete failed:', e);
+            toast('Could not delete — check your connection and try again.');
+        }
+        // Table re-renders automatically via the Firestore listener.
     }
 
     // ── Clear all ──────────────────────────────────────────────
-    function clearAll() {
+    async function clearAll() {
         if (!records.length) return toast('No records to clear.');
         if (!confirm('Delete ALL records? This cannot be undone.')) return;
-        records = [];
-        save();
         if (editIndex !== null) { editIndex = null; setEditUI(false); clearInputs(); }
-        renderTable();
-        toast('All records cleared.');
+
+        try {
+            const batch = db.batch();
+            records.forEach(r => batch.delete(recordsCol.doc(r.id)));
+            await batch.commit();
+            toast('All records cleared.');
+        } catch (e) {
+            console.error('Clear all failed:', e);
+            toast('Could not clear records — check your connection and try again.');
+        }
     }
 
     // ── Helpers ────────────────────────────────────────────────
-    function save() { localStorage.setItem('callRecords', JSON.stringify(records)); }
-
     function clearInputs() {
         ['student','grade'].forEach(id => {
             document.getElementById(id).value = '';
@@ -1000,13 +1238,14 @@
                         setEditUI(false);
                         clearInputs();
                     }
-                    // Remove exactly the records that were part of this export
-                    // (matched by reference, since `filtered` is a subset of `records`).
-                    records = records.filter(r => !filtered.includes(r));
-                    save();
-                    renderTable();
-                    toast('Exported records cleared.');
-                    return; // renderTable() already rebuilt the tbody
+                    // Remove exactly the records that were part of this export.
+                    const batch = db.batch();
+                    filtered.forEach(r => batch.delete(recordsCol.doc(r.id)));
+                    batch.commit()
+                        .then(() => toast('Exported records cleared.'))
+                        .catch(e => { console.error('Clear after export failed:', e); toast('Could not clear exported records.'); });
+                    tbody.innerHTML = savedHTML; // listener will re-render with the deletions shortly
+                    return;
                 }
             }
 
@@ -1069,16 +1308,6 @@
     renderTable();
     updateExportPreview();
     setDefaultDate();
-
-    // ── PWA: register service worker for offline support ────────
-    // Requires HTTPS (or localhost) — browsers refuse service workers
-    // over plain http:// or file://.
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js')
-                .catch((err) => console.warn('Service worker registration failed:', err));
-        });
-    }
 </script>
 
 
