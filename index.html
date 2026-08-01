@@ -491,6 +491,72 @@
         }
 
         .hidden { display: none !important; }
+
+        /* ── Admin: Manage Students overlay ─────────────────── */
+        .admin-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(26,26,46,0.55);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 16px;
+            z-index: 50;
+            overflow-y: auto;
+        }
+        .admin-panel {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 720px;
+            padding: 22px 26px 26px;
+        }
+        .admin-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--soft);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+        .admin-panel-header h3 {
+            font-family: Arial, sans-serif;
+            font-size: 1rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .admin-close {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--mid);
+            line-height: 1;
+        }
+        .admin-close:hover { color: var(--danger); }
+        .admin-section { margin-bottom: 22px; }
+        .admin-section:last-child { margin-bottom: 0; }
+        .admin-section h4 {
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--mid);
+            font-family: Arial, sans-serif;
+            margin-bottom: 8px;
+        }
+        .admin-hint {
+            font-family: Arial, sans-serif;
+            font-size: 0.78rem;
+            color: var(--mid);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        #studentFileInput {
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            width: 100%;
+        }
+        .admin-section h4 .count { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -530,6 +596,8 @@
         <hr class="header-rule">
         <div class="user-bar">
             Signed in as <strong id="userEmailLabel">&nbsp;</strong>
+            &nbsp;|&nbsp;
+            <span class="logout-link" onclick="openAdminPanel()">Manage Students</span>
             &nbsp;|&nbsp;
             <span class="logout-link" onclick="handleLogout()">Sign out</span>
         </div>
@@ -586,16 +654,40 @@
                 </div>
             </label>
 
+            <!-- Class -->
+            <label class="field" style="flex:.6; min-width:100px;">
+                <span>Class</span>
+                <select id="classSelect" onchange="onClassChange()">
+                    <option value="">Select class</option>
+                    <option value="Other">Other (type manually)</option>
+                </select>
+                <div class="custom-input-wrap" id="classWrap">
+                    <input type="text" id="customClass" placeholder="✏️  Type class…" maxlength="30" oninput="onCustomClassInput()">
+                </div>
+            </label>
+
+            <!-- Section -->
+            <label class="field" style="flex:.5; min-width:90px;">
+                <span>Section</span>
+                <select id="sectionSelect" onchange="onSectionChange()">
+                    <option value="">Select section</option>
+                    <option value="Other">Other (type manually)</option>
+                </select>
+                <div class="custom-input-wrap" id="sectionWrap">
+                    <input type="text" id="customSection" placeholder="✏️  Type section…" maxlength="30" oninput="onCustomSectionInput()">
+                </div>
+            </label>
+
             <!-- Student -->
             <label class="field">
                 <span>Student Name</span>
-                <input type="text" id="student" placeholder="Full name">
-            </label>
-
-            <!-- Grade -->
-            <label class="field" style="flex:.5; min-width:80px;">
-                <span>Grade</span>
-                <input type="text" id="grade" placeholder="e.g. 9A">
+                <select id="student" onchange="toggleCustom('student', 'customStudent', 'studentWrap')">
+                    <option value="">Select class &amp; section first</option>
+                    <option value="Other">Other (not in list / type manually)</option>
+                </select>
+                <div class="custom-input-wrap" id="studentWrap">
+                    <input type="text" id="customStudent" placeholder="✏️  Type student name…" maxlength="120">
+                </div>
             </label>
         </div>
 
@@ -715,11 +807,60 @@
     </div>
 </div>
 
+<!-- ── Admin: Manage Students overlay ────────────────────── -->
+<div id="adminOverlay" class="admin-overlay hidden no-print">
+    <div class="admin-panel">
+        <div class="admin-panel-header">
+            <h3>Manage Students</h3>
+            <span class="admin-close" onclick="closeAdminPanel()">✕</span>
+        </div>
+
+        <div class="admin-section">
+            <h4>Import from Excel</h4>
+            <p class="admin-hint">
+                Upload an .xlsx, .xls or .csv file with columns <strong>Name</strong>, <strong>Class</strong>
+                and <strong>Section</strong> (a <strong>Roll</strong> column is optional). Column names are
+                matched case-insensitively. Students already in the list (same name + class + section) are
+                skipped automatically.
+            </p>
+            <input type="file" id="studentFileInput" accept=".xlsx,.xls,.csv" onchange="handleStudentFile(event)">
+            <div id="importPreviewWrap" class="hidden">
+                <div class="table-wrap" style="margin-top:10px; max-height:260px; overflow-y:auto;">
+                    <table id="importPreviewTable">
+                        <thead><tr><th>Name</th><th>Class</th><th>Section</th><th>Roll</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="actions" style="margin-top:10px;">
+                    <button class="btn btn-add" id="confirmImportBtn" onclick="confirmImport()">＋ Import <span id="importCount">0</span> Student(s)</button>
+                    <button class="btn" style="background:var(--mid); color:var(--white);" onclick="cancelImportPreview()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h4>Current Students (<span class="count" id="studentTotalCount">0</span>)</h4>
+                <button class="btn btn-clear" style="flex:none; padding:6px 12px; font-size:.72rem;" onclick="clearAllStudents()">✕ Clear All</button>
+            </div>
+            <div class="table-wrap" style="margin-top:10px; max-height:320px; overflow-y:auto;">
+                <table id="studentListTable">
+                    <thead><tr><th>Name</th><th>Class</th><th>Section</th><th>Roll</th><th class="no-print"></th></tr></thead>
+                    <tbody><tr class="empty-row"><td colspan="5">No students imported yet.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
 <!-- BS (Bikram Sambat) date conversion library, used only to auto-select today's date -->
 <script src="https://cdn.jsdelivr.net/npm/nepali-date-converter/dist/nepali-date-converter.umd.js"></script>
+
+<!-- SheetJS — reads .xlsx / .xls / .csv files for the Admin "Import from Excel" panel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <!-- Firebase SDK (compat build) — powers staff sign-in and cross-device sync -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -749,6 +890,11 @@
     // Firestore collection all signed-in staff read/write to.
     // Every teacher sees the same shared call log across all devices.
     const recordsCol = db.collection('callRecords');
+
+    // Firestore collection holding the master student list (Name, Class,
+    // Section, Roll) — populated via the "Manage Students" admin panel,
+    // either by Excel import or by removing entries one at a time.
+    const studentsCol = db.collection('students');
 </script>
 
 <script>
@@ -757,6 +903,12 @@
     // watchRecords() below) — no more reading/writing localStorage.
     let records = [];
     let unsubscribeRecords = null; // Firestore listener detacher
+
+    // Master student list (Name, Class, Section, Roll), managed via the
+    // "Manage Students" admin panel and used to drive the Class → Section →
+    // Student Name selectors in the entry form.
+    let students = [];
+    let unsubscribeStudents = null; // Firestore listener detacher
 
     // ── Auth: sign in / out / reset ──────────────────────────────
     function handleLogin() {
@@ -824,9 +976,13 @@
             appWrapper.classList.remove('hidden');
             document.getElementById('userEmailLabel').textContent = user.email;
             watchRecords();
+            watchStudents();
         } else {
             if (unsubscribeRecords) { unsubscribeRecords(); unsubscribeRecords = null; }
+            if (unsubscribeStudents) { unsubscribeStudents(); unsubscribeStudents = null; }
             records = [];
+            students = [];
+            closeAdminPanel();
             appWrapper.classList.add('hidden');
             authScreen.classList.remove('hidden');
             authLoading.classList.add('hidden');
@@ -834,6 +990,19 @@
             document.getElementById('authEmail').focus();
         }
     });
+
+    // ── Real-time sync: mirror the students collection into `students` ──
+    function watchStudents() {
+        if (unsubscribeStudents) return; // already watching
+        unsubscribeStudents = studentsCol.orderBy('name', 'asc').onSnapshot(snapshot => {
+            students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            populateClassOptions();
+            renderAdminStudentList();
+        }, err => {
+            console.error('Students sync error:', err);
+            toast('Could not load student list — check your connection.');
+        });
+    }
 
     // ── Real-time sync: mirror the Firestore collection into `records` ──
     function watchRecords() {
@@ -892,6 +1061,93 @@
         list.push(typedValue);
         saveCustomOptions(selectId, list);
         populateCustomOptions(selectId);
+    }
+
+    // ── Class → Section → Student cascading selectors ────────────
+    // Options for these three selects are derived live from `students`
+    // (the master list managed in the "Manage Students" admin panel),
+    // rather than being hardcoded — so they always match whatever was
+    // last imported.
+
+    // Replace all dynamic <option>s in a select (everything except the
+    // first placeholder option and the trailing "Other" option) with a
+    // fresh list of values, preserving the current selection if it's
+    // still valid.
+    function setDynamicOptions(sel, values) {
+        const otherOpt = [...sel.options].find(o => o.value === 'Other');
+        const prevValue = sel.value;
+        [...sel.options].forEach(o => {
+            if (o.value && o.value !== 'Other') sel.removeChild(o);
+        });
+        values.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            sel.insertBefore(opt, otherOpt);
+        });
+        if ([...sel.options].some(o => o.value === prevValue)) sel.value = prevValue;
+    }
+
+    function populateClassOptions() {
+        const sel = document.getElementById('classSelect');
+        const classes = [...new Set(students.map(s => s.class).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        setDynamicOptions(sel, classes);
+        populateSectionOptions();
+    }
+
+    function onClassChange() {
+        toggleCustom('classSelect', 'customClass', 'classWrap');
+        document.getElementById('sectionSelect').value = '';
+        populateSectionOptions();
+    }
+
+    function onCustomClassInput() { populateSectionOptions(); }
+
+    function selectedClassValue() {
+        const sel = document.getElementById('classSelect');
+        return sel.value === 'Other' ? document.getElementById('customClass').value.trim() : sel.value;
+    }
+
+    function selectedSectionValue() {
+        const sel = document.getElementById('sectionSelect');
+        return sel.value === 'Other' ? document.getElementById('customSection').value.trim() : sel.value;
+    }
+
+    function populateSectionOptions() {
+        const classVal = selectedClassValue();
+        const sel = document.getElementById('sectionSelect');
+        const sections = [...new Set(
+            students.filter(s => s.class === classVal).map(s => s.section).filter(Boolean)
+        )].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        setDynamicOptions(sel, sections);
+        populateStudentOptions();
+    }
+
+    function onSectionChange() {
+        toggleCustom('sectionSelect', 'customSection', 'sectionWrap');
+        document.getElementById('student').value = '';
+        toggleCustom('student', 'customStudent', 'studentWrap');
+        populateStudentOptions();
+    }
+
+    function onCustomSectionInput() { populateStudentOptions(); }
+
+    function populateStudentOptions() {
+        const classVal = selectedClassValue();
+        const sectionVal = selectedSectionValue();
+        const sel = document.getElementById('student');
+        const placeholderOpt = sel.options[0];
+
+        const matches = students
+            .filter(s => s.class === classVal && s.section === sectionVal)
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        placeholderOpt.textContent = (classVal && sectionVal)
+            ? (matches.length ? 'Select student' : 'No students found — try "Other" to type a name')
+            : 'Select class & section first';
+
+        setDynamicOptions(sel, matches.map(s => s.name));
     }
 
     // ── Toggle custom "Other" input ────────────────────────────
@@ -956,13 +1212,23 @@
         const y = document.getElementById('year').value;
         const m = document.getElementById('month').value;
         const d = document.getElementById('day').value;
-        const name   = document.getElementById('student').value.trim();
-        const grade  = document.getElementById('grade').value.trim();
+        const classSel   = document.getElementById('classSelect').value;
+        const sectionSel = document.getElementById('sectionSelect').value;
+        const studentSel = document.getElementById('student').value;
         const spokenSel  = document.getElementById('spokenTo').value;
         const reasonSel  = document.getElementById('reason').value;
         const respSel    = document.getElementById('response').value;
 
         // Resolve custom "Other" values
+        const klass = classSel === 'Other'
+            ? document.getElementById('customClass').value.trim()
+            : classSel;
+        const section = sectionSel === 'Other'
+            ? document.getElementById('customSection').value.trim()
+            : sectionSel;
+        const name = studentSel === 'Other'
+            ? document.getElementById('customStudent').value.trim()
+            : studentSel;
         const spoken = spokenSel === 'Other'
             ? document.getElementById('customSpokenTo').value.trim()
             : spokenSel;
@@ -973,9 +1239,12 @@
             ? document.getElementById('customResponse').value.trim()
             : respSel;
 
+        const grade = [klass, section].filter(Boolean).join('');
+
         if (!y || !m || !d)  return toast('Please select a full date.');
-        if (!name)           return toast('Student name is required.');
-        if (!grade)          return toast('Grade is required.');
+        if (!klass)          return toast('Please select a class — or type one if "Other" is chosen.');
+        if (!section)        return toast('Please select a section — or type one if "Other" is chosen.');
+        if (!name)           return toast('Please select a student name — or type one if "Other" is chosen.');
         if (!spoken)         return toast('Please select who was spoken to — or type one if "Other" is chosen.');
         if (!reason)         return toast('Please select a reason — or type one if "Other" is chosen.');
         if (!resp)           return toast('Please select a parent response — or type one if "Other" is chosen.');
@@ -1029,8 +1298,18 @@
         document.getElementById('year').value = y;
         document.getElementById('month').value = m;
         document.getElementById('day').value = d;
-        document.getElementById('student').value = r.name;
-        document.getElementById('grade').value = r.grade;
+        // Try to find this student in the master list, so class/section can
+        // be re-selected properly. Older records saved before this list
+        // existed (or students since removed from it) fall back to "Other"
+        // with the class/section left for the teacher to fill in manually,
+        // since a combined grade string like "9A" can't be reliably split
+        // back into class + section.
+        const match = students.find(s => s.name === r.name);
+        setSelectOrCustom('classSelect', 'customClass', 'classWrap', match ? match.class : (r.grade || ''));
+        populateSectionOptions();
+        setSelectOrCustom('sectionSelect', 'customSection', 'sectionWrap', match ? match.section : '');
+        populateStudentOptions();
+        setSelectOrCustom('student', 'customStudent', 'studentWrap', r.name);
 
         setSelectOrCustom('spokenTo', 'customSpokenTo', 'spokenToWrap', r.spoken);
         setSelectOrCustom('reason', 'customReason', 'reasonWrap', r.reason);
@@ -1120,19 +1399,18 @@
 
     // ── Helpers ────────────────────────────────────────────────
     function clearInputs() {
-        ['student','grade'].forEach(id => {
-            document.getElementById(id).value = '';
-        });
         // Date fields are intentionally left as-is (not reset to today) so
         // that if the date was changed for a batch of entries, it stays
         // put for the next entries too, instead of jumping back each time.
+        document.getElementById('classSelect').value = '';
+        onClassChange(); // cascades to clear/repopulate section and student too
         document.getElementById('spokenTo').selectedIndex = 0;
         document.getElementById('reason').selectedIndex = 0;
         document.getElementById('response').selectedIndex = 0;
         // Hide and clear custom inputs
-        ['customSpokenTo','customReason','customResponse'].forEach(id => document.getElementById(id).value = '');
-        ['spokenToWrap','reasonWrap','responseWrap'].forEach(id => document.getElementById(id).classList.remove('visible'));
-        document.getElementById('student').focus();
+        ['customClass','customSection','customStudent','customSpokenTo','customReason','customResponse'].forEach(id => document.getElementById(id).value = '');
+        ['classWrap','sectionWrap','studentWrap','spokenToWrap','reasonWrap','responseWrap'].forEach(id => document.getElementById(id).classList.remove('visible'));
+        document.getElementById('classSelect').focus();
     }
 
     let toastTimer;
@@ -1142,6 +1420,156 @@
         el.classList.add('show');
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+    }
+
+    // ── Admin: Manage Students ────────────────────────────────
+    let pendingImportRows = [];
+
+    function openAdminPanel() {
+        document.getElementById('adminOverlay').classList.remove('hidden');
+        renderAdminStudentList();
+    }
+
+    function closeAdminPanel() {
+        document.getElementById('adminOverlay').classList.add('hidden');
+        cancelImportPreview();
+    }
+
+    // Reads the chosen Excel/CSV file with SheetJS, expecting columns
+    // Name, Class, Section (case-insensitive) and an optional Roll column.
+    function handleStudentFile(evt) {
+        const file = evt.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+
+                const parsed = rows.map(row => {
+                    const norm = {};
+                    Object.keys(row).forEach(k => { norm[k.trim().toLowerCase()] = row[k]; });
+                    return {
+                        name:    String(norm.name || '').trim(),
+                        class:   String(norm.class || norm.grade || '').trim(),
+                        section: String(norm.section || '').trim(),
+                        roll:    String(norm.roll || norm['roll no'] || norm['roll number'] || '').trim(),
+                    };
+                }).filter(r => r.name && r.class && r.section);
+
+                if (!parsed.length) {
+                    toast('No valid rows found — make sure the file has Name, Class and Section columns.');
+                } else {
+                    pendingImportRows = parsed;
+                    renderImportPreview();
+                }
+            } catch (err) {
+                console.error('Excel parse failed:', err);
+                toast('Could not read that file — please check the format.');
+            }
+            evt.target.value = ''; // allow re-selecting the same file later
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function renderImportPreview() {
+        const wrap = document.getElementById('importPreviewWrap');
+        const tbody = document.querySelector('#importPreviewTable tbody');
+        tbody.innerHTML = pendingImportRows.map(r =>
+            `<tr><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.class)}</td><td>${escapeHtml(r.section)}</td><td>${escapeHtml(r.roll)}</td></tr>`
+        ).join('');
+        document.getElementById('importCount').textContent = pendingImportRows.length;
+        wrap.classList.remove('hidden');
+    }
+
+    function cancelImportPreview() {
+        pendingImportRows = [];
+        document.getElementById('importPreviewWrap').classList.add('hidden');
+        document.querySelector('#importPreviewTable tbody').innerHTML = '';
+    }
+
+    async function confirmImport() {
+        if (!pendingImportRows.length) return;
+        const btn = document.getElementById('confirmImportBtn');
+        btn.disabled = true;
+
+        try {
+            // Skip rows that already exist (same name+class+section) to avoid duplicates.
+            const existingKeys = new Set(students.map(s => `${s.name}|${s.class}|${s.section}`));
+            const toAdd = pendingImportRows.filter(r => !existingKeys.has(`${r.name}|${r.class}|${r.section}`));
+
+            if (!toAdd.length) {
+                toast('All students in that file are already in the list.');
+            } else {
+                // Firestore batched writes are capped at 500 operations each.
+                for (let i = 0; i < toAdd.length; i += 450) {
+                    const batch = db.batch();
+                    toAdd.slice(i, i + 450).forEach(r => batch.set(studentsCol.doc(), r));
+                    await batch.commit();
+                }
+                toast(`Imported ${toAdd.length} student(s) ✓`);
+            }
+        } catch (e) {
+            console.error('Student import failed:', e);
+            toast('Import failed — check your connection and try again.');
+        }
+
+        btn.disabled = false;
+        cancelImportPreview();
+    }
+
+    function renderAdminStudentList() {
+        const countEl = document.getElementById('studentTotalCount');
+        if (!countEl) return; // panel not in DOM yet on first load
+        countEl.textContent = students.length;
+
+        const tbody = document.querySelector('#studentListTable tbody');
+        if (!students.length) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No students imported yet.</td></tr>';
+            return;
+        }
+        const sorted = [...students].sort((a, b) =>
+            a.class.localeCompare(b.class, undefined, { numeric: true }) ||
+            a.section.localeCompare(b.section, undefined, { numeric: true }) ||
+            a.name.localeCompare(b.name)
+        );
+        tbody.innerHTML = sorted.map(s =>
+            `<tr><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.class)}</td><td>${escapeHtml(s.section)}</td><td>${escapeHtml(s.roll || '')}</td>
+             <td class="no-print"><button class="del-btn" title="Delete" onclick="deleteStudent('${s.id}')">✕</button></td></tr>`
+        ).join('');
+    }
+
+    async function deleteStudent(id) {
+        if (!confirm('Remove this student from the list?')) return;
+        try {
+            await studentsCol.doc(id).delete();
+        } catch (e) {
+            console.error('Delete student failed:', e);
+            toast('Could not delete — check your connection and try again.');
+        }
+    }
+
+    async function clearAllStudents() {
+        if (!students.length) return toast('No students to clear.');
+        if (!confirm(`Delete ALL ${students.length} students from the list? This cannot be undone.`)) return;
+        try {
+            for (let i = 0; i < students.length; i += 450) {
+                const batch = db.batch();
+                students.slice(i, i + 450).forEach(s => batch.delete(studentsCol.doc(s.id)));
+                await batch.commit();
+            }
+            toast('All students cleared.');
+        } catch (e) {
+            console.error('Clear students failed:', e);
+            toast('Could not clear students — check your connection and try again.');
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
     // ── Export preview ─────────────────────────────────────────
