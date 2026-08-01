@@ -490,6 +490,49 @@
             text-decoration: underline;
         }
 
+        /* ── Bulk entry: whole-class student checklist ──────── */
+        .bulk-student-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 0.76rem;
+            color: var(--mid);
+            margin: 4px 0 6px;
+        }
+        .bulk-student-toolbar .link-btn {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .bulk-student-list {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--white);
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 4px 10px;
+        }
+        .bulk-student-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 2px;
+            font-size: 0.86rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--soft);
+        }
+        .bulk-student-item:last-child { border-bottom: none; }
+        .bulk-student-item input { width: auto; cursor: pointer; }
+        .bulk-roll { color: var(--mid); font-family: Arial, sans-serif; font-size: 0.74rem; }
+        .bulk-empty {
+            font-family: Arial, sans-serif;
+            font-size: 0.8rem;
+            color: var(--mid);
+            font-style: italic;
+            padding: 10px 2px;
+        }
+
         .hidden { display: none !important; }
 
         /* ── Admin: Manage Students overlay ─────────────────── */
@@ -679,7 +722,7 @@
             </label>
 
             <!-- Student -->
-            <label class="field">
+            <label class="field" id="singleStudentField">
                 <span>Student Name</span>
                 <select id="student" onchange="toggleCustom('student', 'customStudent', 'studentWrap')">
                     <option value="">Select class &amp; section first</option>
@@ -689,6 +732,28 @@
                     <input type="text" id="customStudent" placeholder="✏️  Type student name…" maxlength="120">
                 </div>
             </label>
+        </div>
+
+        <div class="form-row" id="bulkToggleRow">
+            <label style="display:flex; align-items:center; gap:8px; font-family:Arial, sans-serif; font-size:0.82rem; color:var(--mid); cursor:pointer;">
+                <input type="checkbox" id="bulkMode" style="width:auto; cursor:pointer;" onchange="onBulkModeChange()">
+                Bulk entry — log the same call details for the whole class &amp; section at once
+            </label>
+        </div>
+
+        <div class="form-row hidden" id="bulkStudentRow">
+            <div class="field" style="flex:1 1 100%;">
+                <span style="font-size:0.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--mid); font-family:Arial, sans-serif;">Students in this Class &amp; Section</span>
+                <div class="bulk-student-toolbar">
+                    <span class="link-btn" onclick="setAllBulkStudents(true)">Select all</span>
+                    &nbsp;|&nbsp;
+                    <span class="link-btn" onclick="setAllBulkStudents(false)">Select none</span>
+                    <span id="bulkStudentCount" style="margin-left:auto;"></span>
+                </div>
+                <div class="bulk-student-list" id="bulkStudentList">
+                    <div class="bulk-empty">Select a class and section above to see students.</div>
+                </div>
+            </div>
         </div>
 
         <div class="form-row">
@@ -1000,7 +1065,7 @@
             renderAdminStudentList();
         }, err => {
             console.error('Students sync error:', err);
-            toast('Could not load student list — check your connection.');
+            toast(firestoreErrorMessage(err, 'Could not load student list — check your connection.'));
         });
     }
 
@@ -1148,6 +1213,62 @@
             : 'Select class & section first';
 
         setDynamicOptions(sel, matches.map(s => s.name));
+        renderBulkStudentList(matches);
+    }
+
+    // ── Bulk entry: whole class/section at once ───────────────
+    function onBulkModeChange() {
+        const bulk = document.getElementById('bulkMode').checked;
+        document.getElementById('singleStudentField').classList.toggle('hidden', bulk);
+        document.getElementById('bulkStudentRow').classList.toggle('hidden', !bulk);
+        if (bulk) {
+            // Bulk mode picks from the checklist only — clear any single-select state.
+            document.getElementById('student').value = '';
+            toggleCustom('student', 'customStudent', 'studentWrap');
+        }
+        updateAddButtonLabel();
+    }
+
+    function renderBulkStudentList(matches) {
+        const list = document.getElementById('bulkStudentList');
+        if (!list) return; // not in DOM yet
+        if (!matches.length) {
+            list.innerHTML = '<div class="bulk-empty">No students found for this class &amp; section.</div>';
+        } else {
+            list.innerHTML = matches.map(s => `
+                <label class="bulk-student-item">
+                    <input type="checkbox" class="bulk-student-checkbox" value="${escapeHtml(s.name)}" checked onchange="updateAddButtonLabel()">
+                    ${escapeHtml(s.name)}${s.roll ? ` <span class="bulk-roll">(Roll ${escapeHtml(s.roll)})</span>` : ''}
+                </label>
+            `).join('');
+        }
+        updateAddButtonLabel();
+    }
+
+    function setAllBulkStudents(checked) {
+        document.querySelectorAll('.bulk-student-checkbox').forEach(cb => cb.checked = checked);
+        updateAddButtonLabel();
+    }
+
+    function getBulkSelectedNames() {
+        return [...document.querySelectorAll('.bulk-student-checkbox:checked')].map(cb => cb.value);
+    }
+
+    // Keeps the Add button's label (and the "N selected" counter) in sync
+    // with bulk mode and how many students are currently checked. Skipped
+    // while editing an existing entry — setEditUI owns the label then.
+    function updateAddButtonLabel() {
+        if (editIndex !== null) return;
+        const addBtn = document.getElementById('addBtn');
+        const countEl = document.getElementById('bulkStudentCount');
+        if (document.getElementById('bulkMode').checked) {
+            const n = getBulkSelectedNames().length;
+            if (countEl) countEl.textContent = n ? `${n} selected` : '';
+            addBtn.textContent = n ? `＋ Add Entry for ${n} Student${n === 1 ? '' : 's'}` : '＋ Add Entries';
+        } else {
+            if (countEl) countEl.textContent = '';
+            addBtn.textContent = '＋ Add Entry';
+        }
     }
 
     // ── Toggle custom "Other" input ────────────────────────────
@@ -1214,6 +1335,7 @@
         const d = document.getElementById('day').value;
         const classSel   = document.getElementById('classSelect').value;
         const sectionSel = document.getElementById('sectionSelect').value;
+        const bulkMode   = editIndex === null && document.getElementById('bulkMode').checked;
         const studentSel = document.getElementById('student').value;
         const spokenSel  = document.getElementById('spokenTo').value;
         const reasonSel  = document.getElementById('reason').value;
@@ -1226,9 +1348,6 @@
         const section = sectionSel === 'Other'
             ? document.getElementById('customSection').value.trim()
             : sectionSel;
-        const name = studentSel === 'Other'
-            ? document.getElementById('customStudent').value.trim()
-            : studentSel;
         const spoken = spokenSel === 'Other'
             ? document.getElementById('customSpokenTo').value.trim()
             : spokenSel;
@@ -1244,15 +1363,53 @@
         if (!y || !m || !d)  return toast('Please select a full date.');
         if (!klass)          return toast('Please select a class — or type one if "Other" is chosen.');
         if (!section)        return toast('Please select a section — or type one if "Other" is chosen.');
-        if (!name)           return toast('Please select a student name — or type one if "Other" is chosen.');
         if (!spoken)         return toast('Please select who was spoken to — or type one if "Other" is chosen.');
         if (!reason)         return toast('Please select a reason — or type one if "Other" is chosen.');
         if (!resp)           return toast('Please select a parent response — or type one if "Other" is chosen.');
 
+        const addBtn = document.getElementById('addBtn');
+
+        // ── Bulk path: one identical call record per checked student ──
+        if (bulkMode) {
+            const names = getBulkSelectedNames();
+            if (!names.length) return toast('Select at least one student for bulk entry.');
+
+            addBtn.disabled = true;
+            try {
+                // Firestore batched writes are capped at 500 operations each.
+                for (let i = 0; i < names.length; i += 450) {
+                    const batch = db.batch();
+                    names.slice(i, i + 450).forEach(name => {
+                        batch.set(recordsCol.doc(), {
+                            date: `${y}/${m}/${d}`, name, grade, spoken, reason, resp,
+                            createdBy: auth.currentUser ? auth.currentUser.email : null,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+                    await batch.commit();
+                }
+                rememberIfNew('spokenTo', spokenSel, spoken);
+                rememberIfNew('reason', reasonSel, reason);
+                rememberIfNew('response', respSel, resp);
+                clearInputs();
+                toast(`Added ${names.length} entr${names.length === 1 ? 'y' : 'ies'} ✓`);
+            } catch (e) {
+                console.error('Bulk save failed:', e);
+                toast(firestoreErrorMessage(e, 'Could not save — check your connection and try again.'));
+            }
+            addBtn.disabled = false;
+            return;
+        }
+
+        // ── Single-student path (add or edit) ──────────────────────
+        const name = studentSel === 'Other'
+            ? document.getElementById('customStudent').value.trim()
+            : studentSel;
+        if (!name) return toast('Please select a student name — or type one if "Other" is chosen.');
+
         const record = { date: `${y}/${m}/${d}`, name, grade, spoken, reason, resp };
         const wasEditing = editIndex !== null;
 
-        const addBtn = document.getElementById('addBtn');
         addBtn.disabled = true;
 
         try {
@@ -1268,7 +1425,7 @@
         } catch (e) {
             console.error('Save failed:', e);
             addBtn.disabled = false;
-            return toast('Could not save — check your connection and try again.');
+            return toast(firestoreErrorMessage(e, 'Could not save — check your connection and try again.'));
         }
         addBtn.disabled = false;
 
@@ -1348,12 +1505,19 @@
     function setEditUI(isEditing) {
         const addBtn = document.getElementById('addBtn');
         const cancelBtn = document.getElementById('cancelEditBtn');
+        const bulkToggleRow = document.getElementById('bulkToggleRow');
+        const bulkModeCb = document.getElementById('bulkMode');
         if (isEditing) {
+            // Editing always targets one existing record — bulk entry doesn't apply.
+            bulkModeCb.checked = false;
+            onBulkModeChange();
+            bulkToggleRow.classList.add('hidden');
             addBtn.textContent = '✓ Update Entry';
             cancelBtn.style.display = '';
         } else {
-            addBtn.textContent = '＋ Add Entry';
+            bulkToggleRow.classList.remove('hidden');
             cancelBtn.style.display = 'none';
+            updateAddButtonLabel();
         }
     }
 
@@ -1514,7 +1678,7 @@
             }
         } catch (e) {
             console.error('Student import failed:', e);
-            toast('Import failed — check your connection and try again.');
+            toast(firestoreErrorMessage(e, 'Import failed — check your connection and try again.'));
         }
 
         btn.disabled = false;
@@ -1548,7 +1712,7 @@
             await studentsCol.doc(id).delete();
         } catch (e) {
             console.error('Delete student failed:', e);
-            toast('Could not delete — check your connection and try again.');
+            toast(firestoreErrorMessage(e, 'Could not delete — check your connection and try again.'));
         }
     }
 
@@ -1564,12 +1728,25 @@
             toast('All students cleared.');
         } catch (e) {
             console.error('Clear students failed:', e);
-            toast('Could not clear students — check your connection and try again.');
+            toast(firestoreErrorMessage(e, 'Could not clear students — check your connection and try again.'));
         }
     }
 
     function escapeHtml(str) {
         return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // Turns a Firestore error into a message that actually explains what
+    // went wrong, instead of a generic "check your connection" toast.
+    // 'permission-denied' almost always means the Firestore security rules
+    // don't allow read/write on this collection yet (a common gap right
+    // after adding a new collection like "students").
+    function firestoreErrorMessage(e, fallback) {
+        if (e && e.code === 'permission-denied') {
+            return 'Permission denied by Firestore security rules — the "students" collection needs to be added to your rules (see console for details).';
+        }
+        if (e && e.message) return `${fallback} (${e.message})`;
+        return fallback;
     }
 
     // ── Export preview ─────────────────────────────────────────
@@ -1736,6 +1913,7 @@
     renderTable();
     updateExportPreview();
     setDefaultDate();
+    updateAddButtonLabel();
 </script>
 
 
