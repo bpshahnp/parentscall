@@ -952,8 +952,10 @@
     const auth = firebase.auth();
     const db   = firebase.firestore();
 
-    // Firestore collection all signed-in staff read/write to.
-    // Every teacher sees the same shared call log across all devices.
+    // Firestore collection all signed-in staff share, but each teacher
+    // only ever reads/writes the subset of documents where ownerId ==
+    // their own uid (see watchRecords() below) — so every teacher gets
+    // their own private call log, synced across their own devices.
     const recordsCol = db.collection('callRecords');
 
     // Firestore collection holding the master student list (Name, Class,
@@ -1069,17 +1071,41 @@
         });
     }
 
-    // ── Real-time sync: mirror the Firestore collection into `records` ──
+    // ── One-time migration: claim old shared records as your own ──────
+    // Before this update every teacher's entries lived in one shared pool
+    // with no owner. The first time each teacher signs in after the
+    // update, this claims any record they personally created (matched by
+    // their email in `createdBy`) that doesn't have an ownerId yet, so
+    // their history isn't lost. Once claimed, a record is never touched
+    // by this again (the ownerId check keeps it a no-op after that).
+    async function claimLegacyRecords(user) {
+        try {
+            const snapshot = await recordsCol.where('createdBy', '==', user.email).get();
+            const unclaimed = snapshot.docs.filter(doc => !doc.data().ownerId);
+            for (let i = 0; i < unclaimed.length; i += 450) {
+                const batch = db.batch();
+                unclaimed.slice(i, i + 450).forEach(doc => batch.update(doc.ref, { ownerId: user.uid }));
+                await batch.commit();
+            }
+        } catch (e) {
+            console.error('Legacy record claim failed:', e);
+        }
+    }
+
+    // ── Real-time sync: mirror only the signed-in user's own records ──
     function watchRecords() {
         if (unsubscribeRecords) return; // already watching
-        unsubscribeRecords = recordsCol.orderBy('date', 'asc').onSnapshot(snapshot => {
+        const user = auth.currentUser;
+        unsubscribeRecords = recordsCol.where('ownerId', '==', user.uid).onSnapshot(snapshot => {
             records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            records.sort((a, b) => a.date.localeCompare(b.date));
             renderTable();
             updateExportPreview();
         }, err => {
             console.error('Firestore sync error:', err);
             toast('Could not load records — check your connection.');
         });
+        claimLegacyRecords(user);
     }
 
     // ── Custom options that should persist forever ───────────────
@@ -1382,6 +1408,7 @@
                     names.slice(i, i + 450).forEach(name => {
                         batch.set(recordsCol.doc(), {
                             date: `${y}/${m}/${d}`, name, grade, spoken, reason, resp,
+                            ownerId: auth.currentUser ? auth.currentUser.uid : null,
                             createdBy: auth.currentUser ? auth.currentUser.email : null,
                             createdAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
@@ -1418,6 +1445,7 @@
             } else {
                 await recordsCol.add({
                     ...record,
+                    ownerId: auth.currentUser ? auth.currentUser.uid : null,
                     createdBy: auth.currentUser ? auth.currentUser.email : null,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
