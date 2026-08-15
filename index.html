@@ -796,7 +796,7 @@
 
             <!-- Response -->
             <label class="field">
-                <span>Parent's Response</span>
+                <span>Parent's Response (optional)</span>
                 <select id="response" onchange="toggleCustom(&#39;response&#39;, &#39;customResponse&#39;, &#39;responseWrap&#39;)">
                     <option value="">Select response</option>
                     <option>Confirmed</option>
@@ -1327,14 +1327,19 @@
         } else {
             tbody.innerHTML = records.map((r, i) => {
                 const cls = badgeClass[r.resp] || '';
+                // No response recorded: let the Reason cell span both the
+                // Reason and Parent's Response columns instead of leaving
+                // an empty cell.
+                const reasonResponseCells = r.resp
+                    ? `<td>${r.reason}</td><td>${cls ? `<span class="badge ${cls}">${r.resp}</span>` : r.resp}</td>`
+                    : `<td colspan="2">${r.reason}</td>`;
                 return `<tr>
                     <td>${i + 1}</td>
                     <td>${r.date}</td>
                     <td>${r.name}</td>
                     <td style="text-align:center">${r.grade}</td>
                     <td>${r.spoken}</td>
-                    <td>${r.reason}</td>
-                    <td>${cls ? `<span class="badge ${cls}">${r.resp}</span>` : r.resp}</td>
+                    ${reasonResponseCells}
                     <td class="no-print"><button class="del-btn" title="Edit" onclick="editRecord(${i})">✎</button><button class="del-btn" title="Delete" onclick="deleteRecord(${i})">✕</button></td>
                 </tr>`;
             }).join('');
@@ -1391,7 +1396,9 @@
         if (!section)        return toast('Please select a section — or type one if "Other" is chosen.');
         if (!spoken)         return toast('Please select who was spoken to — or type one if "Other" is chosen.');
         if (!reason)         return toast('Please select a reason — or type one if "Other" is chosen.');
-        if (!resp)           return toast('Please select a parent response — or type one if "Other" is chosen.');
+        // Parent's Response is optional — if left blank, the Reason cell
+        // simply spans both columns when the table is rendered (see
+        // renderTable() and doPrint()).
 
         const addBtn = document.getElementById('addBtn');
 
@@ -1834,14 +1841,16 @@
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20pt;font-style:italic;">No records in the selected date range.</td></tr>';
         } else {
             tbody.innerHTML = filtered.map((r, i) => {
+                const reasonResponseCells = r.resp
+                    ? `<td>${r.reason}</td><td>${r.resp}</td>`
+                    : `<td colspan="2">${r.reason}</td>`;
                 return `<tr>
                     <td style="text-align:center">${i + 1}</td>
                     <td>${r.date}</td>
                     <td>${r.name}</td>
                     <td style="text-align:center">${r.grade}</td>
                     <td>${r.spoken}</td>
-                    <td>${r.reason}</td>
-                    <td>${r.resp}</td>
+                    ${reasonResponseCells}
                     <td class="no-print"></td>
                 </tr>`;
             }).join('');
