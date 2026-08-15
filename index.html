@@ -1793,8 +1793,8 @@
 
         let parts = [];
         if (teacher) parts.push(`Teacher: <strong>${teacher}</strong>`);
-        if (from)    parts.push(`From: <strong>${from}</strong>`);
-        if (to)      parts.push(`To: <strong>${to}</strong>`);
+        if (from)    parts.push(`From: <strong>${normalizeDate(from)}</strong>`);
+        if (to)      parts.push(`To: <strong>${normalizeDate(to)}</strong>`);
 
         // Count matching records
         const filtered = filterRecords(from, to);
@@ -1807,11 +1807,27 @@
             : 'Fill in teacher name and date range, then click <strong>Export / Print PDF</strong> below.';
     }
 
+    // ── Normalize a typed date to the same "YYYY/MM/DD" (zero-padded)
+    // shape records are stored in, so the From/To filter still matches
+    // correctly no matter which separator (/, -, ., space) or padding
+    // the teacher types — e.g. "2083-4-10", "2083.04.10" and
+    // "2083/04/10" all normalize to the same string and compare
+    // correctly against stored record dates.
+    function normalizeDate(str) {
+        if (!str) return '';
+        const parts = str.trim().split(/[^0-9]+/).filter(Boolean);
+        if (parts.length !== 3) return str.trim(); // not a recognizable Y/M/D — fall back as-is
+        const [y, m, d] = parts;
+        return `${y.padStart(4, '0')}/${m.padStart(2, '0')}/${d.padStart(2, '0')}`;
+    }
+
     // ── Filter records by date range ────────────────────────────
     function filterRecords(from, to) {
+        const fromN = normalizeDate(from);
+        const toN   = normalizeDate(to);
         return records.filter(r => {
-            if (from && r.date < from) return false;
-            if (to   && r.date > to)   return false;
+            if (fromN && r.date < fromN) return false;
+            if (toN   && r.date > toN)   return false;
             return true;
         });
     }
@@ -1822,10 +1838,13 @@
         const from    = document.getElementById('exportFrom').value.trim();
         const to      = document.getElementById('exportTo').value.trim();
 
-        // Update print meta elements
+        // Update print meta elements (normalized, so the printed header
+        // shows the actual YYYY/MM/DD range that was matched against).
         document.getElementById('printTeacher').textContent = teacher || '(not specified)';
-        const periodText = (from || to)
-            ? `${from || '—'} to ${to || '—'}`
+        const fromN = normalizeDate(from);
+        const toN   = normalizeDate(to);
+        const periodText = (fromN || toN)
+            ? `${fromN || '—'} to ${toN || '—'}`
             : 'All dates';
         document.getElementById('printPeriod').textContent = periodText;
 
