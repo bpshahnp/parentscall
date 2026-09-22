@@ -1,6 +1,6 @@
 // Bump this when you update index.html/manifest/icons so the new
 // version gets picked up instead of the old cached one.
-const CACHE_NAME = 'osa-call-record-v1';
+const CACHE_NAME = 'osa-call-record-v2';
 
 const APP_SHELL = [
   './',
