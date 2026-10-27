@@ -578,14 +578,43 @@
         .bulk-student-item {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
             padding: 6px 2px;
             font-size: 0.86rem;
-            cursor: pointer;
             border-bottom: 1px solid var(--soft);
         }
         .bulk-student-item:last-child { border-bottom: none; }
-        .bulk-student-item input { width: auto; cursor: pointer; }
+        .bulk-student-item input[type="checkbox"] { width: auto; cursor: pointer; }
+        .bulk-student-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 160px;
+            min-width: 0;
+            cursor: pointer;
+        }
+        .bulk-spoken {
+            flex: 0 0 auto;
+            width: 150px;
+            padding: 4px 6px;
+            font-size: 0.8rem;
+        }
+        .bulk-spoken-custom {
+            flex: 1 1 140px;
+            min-width: 120px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-color: var(--accent);
+            background: var(--accent-lt);
+        }
+        .bulk-setall {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 12px;
+        }
+        .bulk-setall select { padding: 2px 6px; font-size: 0.76rem; }
         .bulk-roll { color: var(--mid); font-family: Arial, sans-serif; font-size: 0.74rem; }
         .bulk-empty {
             font-family: Arial, sans-serif;
@@ -824,6 +853,10 @@
                     <span class="link-btn" onclick="setAllBulkStudents(true)">Select all</span>
                     &nbsp;|&nbsp;
                     <span class="link-btn" onclick="setAllBulkStudents(false)">Select none</span>
+                    <span class="bulk-setall">
+                        Set everyone's "Spoken To" to:
+                        <select id="bulkSetAllSpoken" onchange="setAllBulkSpoken(this.value)"></select>
+                    </span>
                     <span id="bulkStudentCount" style="margin-left:auto;"></span>
                 </div>
                 <div class="bulk-student-list" id="bulkStudentList">
@@ -833,8 +866,8 @@
         </div>
 
         <div class="form-row">
-            <!-- Spoken to -->
-            <label class="field">
+            <!-- Spoken to (hidden in bulk mode — each student gets their own selector there) -->
+            <label class="field" id="spokenToField">
                 <span>Spoken To</span>
                 <select id="spokenTo" onchange="toggleCustom('spokenTo', 'customSpokenTo', 'spokenToWrap')">
                     <option value="">Select relation</option>
@@ -1364,6 +1397,8 @@
         const bulk = document.getElementById('bulkMode').checked;
         document.getElementById('singleStudentField').classList.toggle('hidden', bulk);
         document.getElementById('bulkStudentRow').classList.toggle('hidden', !bulk);
+        // In bulk mode "Spoken To" is chosen per student in the checklist instead.
+        document.getElementById('spokenToField').classList.toggle('hidden', bulk);
         if (bulk) {
             // Bulk mode picks from the checklist only — clear any single-select state.
             document.getElementById('student').value = '';
@@ -1378,14 +1413,66 @@
         if (!matches.length) {
             list.innerHTML = '<div class="bulk-empty">No students found for this class &amp; section.</div>';
         } else {
+            const opts = bulkSpokenOptionsHtml(BULK_DEFAULT_SPOKEN);
             list.innerHTML = matches.map(s => `
-                <label class="bulk-student-item">
-                    <input type="checkbox" class="bulk-student-checkbox" value="${escapeHtml(s.name)}" checked onchange="updateAddButtonLabel()">
-                    ${escapeHtml(s.name)}${s.roll ? ` <span class="bulk-roll">(Roll ${escapeHtml(s.roll)})</span>` : ''}
-                </label>
+                <div class="bulk-student-item">
+                    <label class="bulk-student-name">
+                        <input type="checkbox" class="bulk-student-checkbox" value="${escapeHtml(s.name)}" checked onchange="updateAddButtonLabel()">
+                        <span>${escapeHtml(s.name)}${s.roll ? ` <span class="bulk-roll">(Roll ${escapeHtml(s.roll)})</span>` : ''}</span>
+                    </label>
+                    <select class="bulk-spoken" title="Who was spoken to" onchange="onBulkSpokenChange(this)">${opts}</select>
+                    <input type="text" class="bulk-spoken-custom hidden" placeholder="✏️  Guardian name / relation…" maxlength="120">
+                </div>
             `).join('');
         }
+        renderBulkSetAllSelect();
         updateAddButtonLabel();
+    }
+
+    // Default person spoken to when a student is first listed in bulk mode.
+    const BULK_DEFAULT_SPOKEN = 'Mother';
+
+    // Relation options for the per-student selectors. Taken from the main
+    // "Spoken To" dropdown so any custom relations saved earlier show up too.
+    function bulkSpokenValues() {
+        const vals = [...document.getElementById('spokenTo').options]
+            .map(o => o.value)
+            .filter(v => v && v !== 'Other');
+        if (!vals.includes(BULK_DEFAULT_SPOKEN)) vals.unshift(BULK_DEFAULT_SPOKEN);
+        return vals;
+    }
+
+    function bulkSpokenOptionsHtml(selected) {
+        return bulkSpokenValues().map(v =>
+            `<option value="${escapeHtml(v)}"${v === selected ? ' selected' : ''}>${escapeHtml(v)}</option>`
+        ).join('') + '<option value="Other">Guardian / Other (type name)</option>';
+    }
+
+    function renderBulkSetAllSelect() {
+        const sel = document.getElementById('bulkSetAllSpoken');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">— choose —</option>' +
+            bulkSpokenValues().map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    }
+
+    // Show the typed-name box only when a student's selector is "Other".
+    function onBulkSpokenChange(sel) {
+        const custom = sel.parentElement.querySelector('.bulk-spoken-custom');
+        const isOther = sel.value === 'Other';
+        custom.classList.toggle('hidden', !isOther);
+        if (isOther) custom.focus(); else custom.value = '';
+    }
+
+    // Apply one relation to every student in the list (each can still be
+    // changed individually afterwards).
+    function setAllBulkSpoken(value) {
+        if (!value) return;
+        document.querySelectorAll('#bulkStudentList .bulk-student-item').forEach(row => {
+            const sel = row.querySelector('.bulk-spoken');
+            sel.value = value;
+            onBulkSpokenChange(sel);
+        });
+        document.getElementById('bulkSetAllSpoken').value = '';
     }
 
     function setAllBulkStudents(checked) {
@@ -1395,6 +1482,24 @@
 
     function getBulkSelectedNames() {
         return [...document.querySelectorAll('.bulk-student-checkbox:checked')].map(cb => cb.value);
+    }
+
+    // Checked students together with who was spoken to for each one.
+    // Returns { entries: [{name, spoken}], missing: [name,...] } where
+    // `missing` lists students set to "Other" with no name typed.
+    function getBulkSelectedEntries() {
+        const entries = [], missing = [];
+        document.querySelectorAll('#bulkStudentList .bulk-student-item').forEach(row => {
+            const cb = row.querySelector('.bulk-student-checkbox');
+            if (!cb.checked) return;
+            const sel = row.querySelector('.bulk-spoken');
+            const spoken = sel.value === 'Other'
+                ? row.querySelector('.bulk-spoken-custom').value.trim()
+                : sel.value;
+            if (!spoken) missing.push(cb.value);
+            entries.push({ name: cb.value, spoken });
+        });
+        return { entries, missing };
     }
 
     // Keeps the Add button's label (and the "N selected" counter) in sync
@@ -1511,8 +1616,9 @@
         if (!y || !m || !d)  return toast('Please select a full date.');
         if (!klass)          return toast('Please select a class — or type one if "Other" is chosen.');
         if (!section)        return toast('Please select a section — or type one if "Other" is chosen.');
-        if (!spoken)         return toast('Please select who was spoken to — or type one if "Other" is chosen.');
-        if (!reason)         return toast('Please select a reason — or type one if "Other" is chosen.');
+        // In bulk mode "Spoken To" is chosen per student, so only check it for single entries.
+        if (!bulkMode && !spoken) return toast('Please select who was spoken to — or type one if "Other" is chosen.');
+        if (!reason)        return toast('Please select a reason — or type one if "Other" is chosen.');
         // Parent's Response is optional — if left blank, the Reason cell
         // simply spans both columns when the table is rendered (see
         // renderTable() and doPrint()).
@@ -1521,15 +1627,18 @@
 
         // ── Bulk path: one identical call record per checked student ──
         if (bulkMode) {
-            const names = getBulkSelectedNames();
+            const { entries: names, missing } = getBulkSelectedEntries();
             if (!names.length) return toast('Select at least one student for bulk entry.');
+            if (missing.length) {
+                return toast(`Type who was spoken to for ${missing[0]}${missing.length > 1 ? ` (and ${missing.length - 1} more)` : ''}.`);
+            }
 
             addBtn.disabled = true;
             try {
                 // Firestore batched writes are capped at 500 operations each.
                 for (let i = 0; i < names.length; i += 450) {
                     const batch = db.batch();
-                    names.slice(i, i + 450).forEach(name => {
+                    names.slice(i, i + 450).forEach(({ name, spoken }) => {
                         batch.set(recordsCol.doc(), {
                             date: `${y}/${m}/${d}`, name, grade, spoken, reason, resp,
                             ownerId: auth.currentUser ? auth.currentUser.uid : null,
@@ -1539,7 +1648,6 @@
                     });
                     await batch.commit();
                 }
-                rememberIfNew('spokenTo', spokenSel, spoken);
                 rememberIfNew('reason', reasonSel, reason);
                 rememberIfNew('response', respSel, resp);
                 clearInputs();
