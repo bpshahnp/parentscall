@@ -1689,6 +1689,11 @@
         }
         addBtn.disabled = false;
 
+        // A student typed in under "Other" goes straight into the Firebase
+        // student list (with this class & section), so they show up in the
+        // dropdown and bulk checklist from now on without re-importing.
+        if (studentSel === 'Other') await saveNewStudent(name, klass, section);
+
         // Remember any newly-typed "Other" values so they become
         // permanent dropdown options going forward.
         rememberIfNew('spokenTo', spokenSel, spoken);
@@ -1702,6 +1707,21 @@
         // listener once the change comes back down, but we don't wait on that.
         clearInputs();
         toast(wasEditing ? 'Entry updated ✓' : 'Entry added ✓');
+    }
+
+    // Add a student to the Firestore master list if that exact name +
+    // class + section isn't already there. Failures are logged and toasted
+    // but never block the call record itself, which is already saved.
+    async function saveNewStudent(name, klass, section) {
+        const key = s => `${s.name.trim().toLowerCase()}|${s.class}|${s.section}`;
+        const candidate = { name: name.trim(), class: klass, section, roll: '' };
+        if (students.some(s => key(s) === key(candidate))) return;
+        try {
+            await studentsCol.add(candidate);
+        } catch (e) {
+            console.error('Saving new student failed:', e);
+            toast(firestoreErrorMessage(e, 'Entry saved, but the new student could not be added to the list.'));
+        }
     }
 
     // ── Edit ───────────────────────────────────────────────────
